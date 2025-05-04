@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Nutrition Tracker</title>
+  <style>
+    body { font-family: Arial; margin: 30px; }
+    input, button { padding: 10px; width: 300px; margin-bottom: 10px; }
+    table { border-collapse: collapse; margin-top: 20px; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 10px; }
+  </style>
+</head>
+<body>
+  <h2>Nutrition Tracker (Nutritionix API)</h2>
+  <input type="text" id="foodInput" placeholder="e.g. 2 eggs, 1 banana">
+  <button onclick="getNutrition()">Track</button>
+
+  <table id="resultsTable">
+    <thead>
+      <tr>
+        <th>Food</th>
+        <th>Calories</th>
+        <th>Protein (g)</th>
+        <th>Carbs (g)</th>
+        <th>Fat (g)</th>
+        <th>Calcium (mg)</th>
+        <th>Iron (mg)</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    async function getNutrition() {
+      const query = document.getElementById('foodInput').value;
+      const response = await fetch('http://localhost:5000/api/nutrition', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query })
+      });
+
+      const data = await response.json();
+      const tbody = document.querySelector('#resultsTable tbody');
+      tbody.innerHTML = '';
+
+      if (data.foods) {
+        data.foods.forEach(item => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${item.food_name}</td>
+            <td>${item.nf_calories}</td>
+            <td>${item.nf_protein}</td>
+            <td>${item.nf_total_carbohydrate}</td>
+            <td>${item.nf_total_fat}</td>
+            <td>${item.nf_calcium_dv || 'N/A'}</td>
+            <td>${item.nf_iron_dv || 'N/A'}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      } else {
+        tbody.innerHTML = '<tr><td colspan="7">No data found.</td></tr>';
+      }
+    }
+  </script>
+</body>
+</html>
